@@ -38,5 +38,54 @@ model User {
   hashedRefreshToken    String?     
   createdAt             DateTime   @default(now())
   updatedAt             DateTime   @updatedAt
+  savingsBooks          SavingsBook[]
 }
 
+enum BookStatus {
+  OPEN
+  CLOSED
+}
+
+model SavingsType {
+  id              Int           @id @default(autoincrement())
+  name            String        // "Không kỳ hạn", "3 tháng", "6 tháng"
+  termMonths      Int           // 0 = không kỳ hạn, 3, 6
+  interestRate    Float         // lãi đúng hạn (%), vd: 5.0, 5.5
+  overdueRate     Float         // lãi quá hạn / không kỳ hạn (%), vd: 0.5
+  minWithdrawDays Int           // số ngày tối thiểu trước khi rút, 0 nếu có kỳ hạn, 15 nếu không kỳ hạn
+  minInitDeposit  Float         // tiền gởi ban đầu tối thiểu, vd: 1_000_000
+  minAddDeposit   Float         // tiền gởi thêm tối thiểu, vd: 100_000
+  isActive        Boolean       @default(true)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  savingsBooks    SavingsBook[]
+}
+
+model Customer {
+  id           Int           @id @default(autoincrement())
+  fullname     String
+  idNumber     String        @unique
+  address      String
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  savingsBooks SavingsBook[]
+}
+
+model SavingsBook {
+  id             Int          @id @default(autoincrement())
+  code           String       @unique
+  customerId     Int
+  savingsTypeId  Int
+  openDate       DateTime
+  balance        Float
+  status         BookStatus   @default(OPEN)
+  openedBy       Int
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  customer       Customer     @relation(fields: [customerId], references: [id])
+  savingsType    SavingsType  @relation(fields: [savingsTypeId], references: [id])
+  openedByUser   User         @relation(fields: [openedBy], references: [id])
+}

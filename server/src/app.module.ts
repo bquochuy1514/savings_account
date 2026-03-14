@@ -5,12 +5,14 @@ import { UsersModule } from './modules/users/users.module';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './modules/auth/auth.module';
 import { PrismaService } from './prisma.service';
+import { SavingsTypeModule } from './modules/savings-type/savings-type.module';
 
 @Module({
   imports: [
     UsersModule,
     ConfigModule.forRoot({ isGlobal: true, envFilePath: '.env' }),
     AuthModule,
+    SavingsTypeModule,
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService],
