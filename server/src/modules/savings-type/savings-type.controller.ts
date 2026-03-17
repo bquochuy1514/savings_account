@@ -3,10 +3,10 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
   UseGuards,
+  Put,
 } from '@nestjs/common';
 import { SavingsTypeService } from './savings-type.service';
 import { CreateSavingsTypeDto } from './dto/create-savings-type.dto';
@@ -22,7 +22,7 @@ export class SavingsTypeController {
   constructor(private readonly savingsTypeService: SavingsTypeService) {}
 
   @Post()
-  @Roles(UserRole.STAFF)
+  @Roles(UserRole.MANAGER)
   @ResponseMessage('Tạo loại tiết kiệm thành công!')
   @UseGuards(JwtAuthGuard, RolesGuard)
   createSavingsType(@Body() createSavingsTypeDto: CreateSavingsTypeDto) {
@@ -32,25 +32,36 @@ export class SavingsTypeController {
   }
 
   @Get()
-  findAll() {
-    return this.savingsTypeService.findAll();
+  @Roles(UserRole.MANAGER, UserRole.STAFF)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  findAllSavingsType() {
+    return this.savingsTypeService.handleFindAllSavingsType();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.savingsTypeService.findOne(+id);
+  @Roles(UserRole.MANAGER, UserRole.STAFF)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  findOneSavingsType(@Param('id') id: number) {
+    return this.savingsTypeService.handleFindOneSavingsType(id);
   }
 
-  @Patch(':id')
-  update(
-    @Param('id') id: string,
+  @Put(':id')
+  @Roles(UserRole.MANAGER)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  updateSavingsType(
+    @Param('id') id: number,
     @Body() updateSavingsTypeDto: UpdateSavingsTypeDto,
   ) {
-    return this.savingsTypeService.update(+id, updateSavingsTypeDto);
+    return this.savingsTypeService.handleUpdateSavingsType(
+      id,
+      updateSavingsTypeDto,
+    );
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.savingsTypeService.remove(+id);
+  @Roles(UserRole.MANAGER)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  deleteSavingsType(@Param('id') id: number) {
+    return this.savingsTypeService.handleDeleteSavingsType(id);
   }
 }

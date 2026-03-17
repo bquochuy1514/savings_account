@@ -1,4 +1,8 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateSavingsTypeDto } from './dto/create-savings-type.dto';
 import { UpdateSavingsTypeDto } from './dto/update-savings-type.dto';
 import { PrismaService } from 'src/prisma.service';
@@ -23,19 +27,46 @@ export class SavingsTypeService {
     return this.prisma.savingsType.create({ data: dto });
   }
 
-  findAll() {
-    return `This action returns all savingsType`;
+  handleFindAllSavingsType() {
+    return this.prisma.savingsType.findMany();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} savingsType`;
+  async handleFindOneSavingsType(id: number) {
+    const savingsType = await this.prisma.savingsType.findUnique({
+      where: { id },
+    });
+
+    if (!savingsType)
+      throw new NotFoundException('Không tìm thấy loại tiết kiệm');
+
+    return savingsType;
   }
 
-  update(id: number, updateSavingsTypeDto: UpdateSavingsTypeDto) {
-    return `This action updates a #${id} savingsType`;
+  async handleUpdateSavingsType(
+    id: number,
+    updateSavingsTypeDto: UpdateSavingsTypeDto,
+  ) {
+    const existing = await this.prisma.savingsType.findUnique({
+      where: { id },
+    });
+
+    if (!existing)
+      throw new NotFoundException('Không tìm thấy loại tiết kiệm cần cập nhật');
+
+    return this.prisma.savingsType.update({
+      where: { id },
+      data: updateSavingsTypeDto,
+    });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} savingsType`;
+  async handleDeleteSavingsType(id: number) {
+    const existing = await this.prisma.savingsType.findUnique({
+      where: { id },
+    });
+
+    if (!existing)
+      throw new NotFoundException('Không tìm thấy loại tiết kiệm cần cập nhật');
+
+    return this.prisma.savingsType.delete({ where: { id } });
   }
 }

@@ -67,7 +67,7 @@ export class AuthService {
       throw new UnauthorizedException('Invalid email or password');
     }
 
-    const { password, ...user } = existingUser;
+    const { password, hashedRefreshToken, ...user } = existingUser;
 
     return user;
   }
@@ -84,7 +84,8 @@ export class AuthService {
     );
 
     return {
-      user_id: user.id,
+      // user_id: user.id,
+      user,
       access_token,
       refresh_token,
     };

@@ -12,10 +12,6 @@ export class CreateSavingsTypeDto {
   @Min(0)
   interestRate: number;
 
-  @IsNumber()
-  @Min(0)
-  overdueRate: number;
-
   @IsInt()
   @Min(0)
   minWithdrawDays: number;

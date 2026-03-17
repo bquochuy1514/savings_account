@@ -1,39 +1,43 @@
-import { PartialType } from '@nestjs/mapped-types';
-import { CreateSavingsTypeDto } from './create-savings-type.dto';
+import {
+  IsBoolean,
+  IsInt,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Min,
+} from 'class-validator';
 
-export class UpdateSavingsTypeDto extends PartialType(CreateSavingsTypeDto) {}
+export class UpdateSavingsTypeDto {
+  @IsOptional()
+  @IsString()
+  name?: string;
 
-// export class UpdateSavingsTypeDto {
-//   @IsOptional()
-//   @IsString()
-//   name?: string;
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  termMonths?: number;
 
-//   @IsOptional()
-//   @IsNumber()
-//   @Min(0)
-//   interestRate?: number;
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  interestRate?: number;
 
-//   @IsOptional()
-//   @IsNumber()
-//   @Min(0)
-//   overdueRate?: number;
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  minWithdrawDays?: number;
 
-//   @IsOptional()
-//   @IsInt()
-//   @Min(0)
-//   minWithdrawDays?: number;
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  minInitDeposit?: number;
 
-//   @IsOptional()
-//   @IsNumber()
-//   @Min(0)
-//   minInitDeposit?: number;
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  minAddDeposit?: number;
 
-//   @IsOptional()
-//   @IsNumber()
-//   @Min(0)
-//   minAddDeposit?: number;
-
-//   @IsOptional()
-//   @IsBoolean()
-//   isActive?: boolean;
-// }
+  @IsOptional()
+  @IsBoolean()
+  isActive?: boolean;
+}
