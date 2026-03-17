@@ -1,26 +1,70 @@
-import { Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateCustomerDto } from './dto/create-customer.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
+import { PrismaService } from 'src/prisma.service';
 
 @Injectable()
 export class CustomersService {
-  hanndleCreateCustomer(createCustomerDto: CreateCustomerDto) {
-    return 'This action adds a new customer';
+  constructor(private prisma: PrismaService) {}
+
+  async handleCreateCustomer(createCustomerDto: CreateCustomerDto) {
+    const existingIdNumber = await this.prisma.customer.findUnique({
+      where: { idNumber: createCustomerDto.idNumber },
+      include: { savingsBooks: true },
+    });
+
+    if (existingIdNumber)
+      throw new ConflictException('CMND đã tồn tại trong hệ thống');
+
+    return this.prisma.customer.create({
+      data: createCustomerDto,
+    });
   }
 
-  findAll() {
-    return `This action returns all customers`;
+  handleFindAllCustomers() {
+    return this.prisma.customer.findMany();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} customer`;
+  async handleFindOneCustomer(id: number) {
+    const customer = await this.prisma.customer.findUnique({
+      where: { id },
+      include: { savingsBooks: true },
+    });
+
+    if (!customer) throw new NotFoundException('Không tìm thấy khách hàng');
+
+    return customer;
   }
 
-  update(id: number, updateCustomerDto: UpdateCustomerDto) {
-    return `This action updates a #${id} customer`;
+  async handleUpdateCustomer(id: number, updateCustomerDto: UpdateCustomerDto) {
+    const customer = await this.prisma.customer.findUnique({
+      where: { id },
+      include: { savingsBooks: true },
+    });
+
+    if (!customer) throw new NotFoundException('Không tìm thấy khách hàng');
+
+    return this.prisma.customer.update({
+      where: { id },
+      data: updateCustomerDto,
+    });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} customer`;
+  async handleDeleteCustomer(id: number) {
+    const customer = await this.prisma.customer.findUnique({
+      where: { id },
+      include: { savingsBooks: true },
+    });
+
+    if (!customer) throw new NotFoundException('Không tìm thấy khách hàng');
+
+    if (customer.savingsBooks.length > 0)
+      throw new ConflictException('Khách hàng còn sổ tiết kiệm đang mở');
+
+    return this.prisma.customer.delete({ where: { id } });
   }
 }

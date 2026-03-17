@@ -3,43 +3,53 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
+  UseGuards,
+  Put,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { CustomersService } from './customers.service';
 import { CreateCustomerDto } from './dto/create-customer.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { ResponseMessage } from 'src/common/decorators/response-message.decorator';
 
 @Controller('customers')
 export class CustomersController {
   constructor(private readonly customersService: CustomersService) {}
 
   @Post()
+  @ResponseMessage('Tạo khách hàng mới thành công!')
+  @UseGuards(JwtAuthGuard)
   createCustomer(@Body() createCustomerDto: CreateCustomerDto) {
-    return this.customersService.hanndleCreateCustomer(createCustomerDto);
+    return this.customersService.handleCreateCustomer(createCustomerDto);
   }
 
   @Get()
-  findAll() {
-    return this.customersService.findAll();
+  @UseGuards(JwtAuthGuard)
+  findAllCustomers() {
+    return this.customersService.handleFindAllCustomers();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.customersService.findOne(+id);
+  @UseGuards(JwtAuthGuard)
+  findOneCustomer(@Param('id', ParseIntPipe) id: number) {
+    return this.customersService.handleFindOneCustomer(id);
   }
 
-  @Patch(':id')
-  update(
-    @Param('id') id: string,
+  @Put(':id')
+  @UseGuards(JwtAuthGuard)
+  updateCustomer(
+    @Param('id', ParseIntPipe) id: number,
     @Body() updateCustomerDto: UpdateCustomerDto,
   ) {
-    return this.customersService.update(+id, updateCustomerDto);
+    return this.customersService.handleUpdateCustomer(id, updateCustomerDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.customersService.remove(+id);
+  @UseGuards(JwtAuthGuard)
+  deleteCustomer(@Param('id', ParseIntPipe) id: number) {
+    return this.customersService.handleDeleteCustomer(id);
   }
 }

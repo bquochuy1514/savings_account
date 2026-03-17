@@ -7,6 +7,7 @@ import {
   Delete,
   UseGuards,
   Put,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { SavingsTypeService } from './savings-type.service';
 import { CreateSavingsTypeDto } from './dto/create-savings-type.dto';
@@ -41,7 +42,7 @@ export class SavingsTypeController {
   @Get(':id')
   @Roles(UserRole.MANAGER, UserRole.STAFF)
   @UseGuards(JwtAuthGuard, RolesGuard)
-  findOneSavingsType(@Param('id') id: number) {
+  findOneSavingsType(@Param('id', ParseIntPipe) id: number) {
     return this.savingsTypeService.handleFindOneSavingsType(id);
   }
 
@@ -49,7 +50,7 @@ export class SavingsTypeController {
   @Roles(UserRole.MANAGER)
   @UseGuards(JwtAuthGuard, RolesGuard)
   updateSavingsType(
-    @Param('id') id: number,
+    @Param('id', ParseIntPipe) id: number,
     @Body() updateSavingsTypeDto: UpdateSavingsTypeDto,
   ) {
     return this.savingsTypeService.handleUpdateSavingsType(
@@ -61,7 +62,7 @@ export class SavingsTypeController {
   @Delete(':id')
   @Roles(UserRole.MANAGER)
   @UseGuards(JwtAuthGuard, RolesGuard)
-  deleteSavingsType(@Param('id') id: number) {
+  deleteSavingsType(@Param('id', ParseIntPipe) id: number) {
     return this.savingsTypeService.handleDeleteSavingsType(id);
   }
 }
