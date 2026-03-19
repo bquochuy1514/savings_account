@@ -20,4 +20,9 @@ async function bootstrap() {
   await app.listen(process.env.PORT || 8080);
 }
 
+// 1. SavingsBook Module (BM1 - mở sổ)
+// 2. Transaction Module (BM2 - gởi thêm)
+// 3. Transaction Module (BM3 - rút tiền, logic tính lãi)
+// 4. BM4, BM5
+
 bootstrap();
