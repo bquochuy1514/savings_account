@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   BadRequestException,
   Inject,
@@ -15,6 +16,7 @@ import { JwtService } from '@nestjs/jwt';
 import refreshJwtConfig from './config/refresh-jwt.config';
 import type { ConfigType } from '@nestjs/config';
 import * as argon2 from 'argon2';
+import { JwtPayload } from 'src/common/types/types';
 
 @Injectable()
 export class AuthService {
@@ -84,14 +86,13 @@ export class AuthService {
     );
 
     return {
-      // user_id: user.id,
       user,
       access_token,
       refresh_token,
     };
   }
 
-  async handleRefreshToken(user: any) {
+  async handleRefreshToken(user: JwtPayload) {
     const { access_token, refresh_token } = await this.generateTokens(user);
 
     const hashedRefreshToken = await argon2.hash(refresh_token);
@@ -108,8 +109,7 @@ export class AuthService {
     };
   }
 
-  async generateTokens(user: any) {
-    // return user;
+  async generateTokens(user: JwtPayload) {
     const payload = { id: user.id, email: user.email, role: user.role };
     const [access_token, refresh_token] = await Promise.all([
       this.jwtService.signAsync(payload),
@@ -122,7 +122,7 @@ export class AuthService {
     };
   }
 
-  async validateRefreshToken(user: any, refreshToken: string) {
+  async validateRefreshToken(user: JwtPayload, refreshToken: string) {
     const userDB = await this.usersService.findUserByEmail(user.email);
     if (!userDB || !userDB.hashedRefreshToken)
       throw new UnauthorizedException('Invalid Refresh Token');
@@ -138,7 +138,7 @@ export class AuthService {
     return user;
   }
 
-  async handleLogout(user: any) {
+  async handleLogout(user: JwtPayload) {
     const userDB = await this.usersService.findUserByEmail(user.email);
     if (!userDB) throw new BadRequestException();
 
