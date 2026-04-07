@@ -1,4 +1,3 @@
-// components/ui/Input.jsx
 import { useState } from 'react';
 import { LuEye, LuEyeOff } from 'react-icons/lu';
 
@@ -6,14 +5,14 @@ import { LuEye, LuEyeOff } from 'react-icons/lu';
  * Input Component - Tái sử dụng linh hoạt
  *
  * Props:
- * @param {string}           label             - Nhãn hiển thị phía trên input
+ * @param {React.ReactNode}  label             - Nhãn hiển thị phía trên input (chấp nhận string hoặc JSX)
  * @param {string}           name              - Tên field (dùng cho handleChange)
  * @param {string}           value             - Giá trị hiện tại
  * @param {function}         onChange          - Hàm xử lý thay đổi
  * @param {string}           placeholder       - Placeholder text
  * @param {'text'|'password'|'email'|'number'} type - Kiểu input (mặc định 'text')
  * @param {string}           error             - Thông báo lỗi (nếu có)
- * @param {React.ReactNode}  suffix            - Element hiển thị bên phải
+ * @param {React.ReactNode}  icon              - Icon hiển thị bên trái bên trong input
  * @param {boolean}          showTogglePassword - Tự động thêm nút hiện/ẩn mật khẩu khi type='password'
  * @param {string}           autoComplete      - Giá trị autocomplete
  * @param {string}           className         - Class tuỳ chỉnh thêm cho thẻ input
@@ -27,6 +26,7 @@ function Input({
 	placeholder,
 	type = 'text',
 	error,
+	icon,
 	showTogglePassword = false,
 	className = '',
 }) {
@@ -39,7 +39,7 @@ function Input({
 		: type;
 
 	return (
-		<div>
+		<div className={`${className}`}>
 			{label && (
 				<label className="block text-xs font-medium text-gray-600 mb-1.5">
 					{label}
@@ -47,6 +47,12 @@ function Input({
 			)}
 
 			<div className="relative">
+				{icon && (
+					<span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+						{icon}
+					</span>
+				)}
+
 				<input
 					type={resolvedType}
 					name={name}
@@ -54,13 +60,15 @@ function Input({
 					onChange={onChange}
 					placeholder={placeholder}
 					className={`
-                        w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg
-                        bg-gray-50 focus:bg-white focus:outline-none
-                        focus:ring-2 focus:ring-blue-100 focus:border-blue-400
-                        transition-colors placeholder:text-gray-300
-                        ${error ? 'border-red-300 focus:ring-red-100 focus:border-red-400' : ''}
-                        ${className}
-                    `}
+						w-full py-2.5 text-sm border border-gray-200 rounded-lg
+						bg-gray-50 focus:bg-white focus:outline-none
+						focus:ring-2 focus:ring-blue-100 focus:border-blue-400
+						transition-colors placeholder:text-gray-300
+						${icon ? 'pl-9' : 'pl-3'}
+						${showTogglePassword ? 'pr-9' : 'pr-3'}
+						${error ? 'border-red-300 focus:ring-red-100 focus:border-red-400' : ''}
+						
+					`}
 				/>
 
 				{showTogglePassword && (

@@ -9,6 +9,7 @@ import {
 } from 'react-icons/lu';
 import { getCustomerByIdNumber } from '../../services/customer';
 import Button from '../../components/ui/Button';
+import Input from '../../components/ui/Input';
 
 export default function Step1({ data, setData, onNext }) {
 	const [mode, setMode] = useState('new'); // 'new' | 'existing'
@@ -85,78 +86,59 @@ export default function Step1({ data, setData, onNext }) {
 					</p>
 					<div className="space-y-4">
 						<div className="grid grid-cols-2 gap-4">
-							<div>
-								<label className="block text-xs font-medium text-gray-500 mb-1.5">
-									Họ và tên{' '}
-									<span className="text-red-400">*</span>
-								</label>
-								<div className="relative">
-									<LuUser
-										size={13}
-										className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-									/>
-									<input
-										type="text"
-										value={data.fullName || ''}
-										onChange={(e) =>
-											setData({
-												...data,
-												fullName: e.target.value,
-											})
-										}
-										placeholder="Nguyễn Văn A"
-										className="w-full pl-8 pr-3 py-2 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400"
-									/>
-								</div>
-							</div>
-							<div>
-								<label className="block text-xs font-medium text-gray-500 mb-1.5">
-									Số CMND / CCCD{' '}
-									<span className="text-red-400">*</span>
-								</label>
-								<div className="relative">
-									<LuIdCard
-										size={13}
-										className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-									/>
-									<input
-										type="text"
-										value={data.idNumber || ''}
-										onChange={(e) =>
-											setData({
-												...data,
-												idNumber: e.target.value,
-											})
-										}
-										placeholder="012345678901"
-										className="w-full pl-8 pr-3 py-2 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400"
-									/>
-								</div>
-							</div>
+							<Input
+								label={
+									<>
+										Họ và tên{' '}
+										<span className="text-red-400">*</span>
+									</>
+								}
+								icon={<LuUser size={15} />}
+								value={data.fullName || ''}
+								onChange={(e) =>
+									setData({
+										...data,
+										fullName: e.target.value,
+									})
+								}
+								placeholder="Nguyễn Văn A"
+							/>
+							<Input
+								label={
+									<>
+										Số CMND / CCCD{' '}
+										<span className="text-red-400">*</span>
+									</>
+								}
+								icon={<LuIdCard size={15} />}
+								value={data.idNumber || ''}
+								onChange={(e) =>
+									setData({
+										...data,
+										idNumber: e.target.value,
+									})
+								}
+								placeholder="012345678901"
+							/>
 						</div>
-						<div>
-							<label className="block text-xs font-medium text-gray-500 mb-1.5">
-								Địa chỉ <span className="text-red-400">*</span>
-							</label>
-							<div className="relative">
-								<LuMapPin
-									size={13}
-									className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-								/>
-								<input
-									type="text"
-									value={data.address || ''}
-									onChange={(e) =>
-										setData({
-											...data,
-											address: e.target.value,
-										})
-									}
-									placeholder="123 Đường ABC, Quận 1, TP.HCM"
-									className="w-full pl-8 pr-3 py-2 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400"
-								/>
-							</div>
-						</div>
+
+						<Input
+							label={
+								<>
+									Địa chỉ{' '}
+									<span className="text-red-400">*</span>
+								</>
+							}
+							icon={<LuMapPin size={15} />}
+							value={data.address || ''}
+							onChange={(e) =>
+								setData({
+									...data,
+									address: e.target.value,
+								})
+							}
+							placeholder="123 Đường ABC, Quận 1, TP.HCM"
+						/>
 					</div>
 
 					<div className="flex justify-end mt-6">
@@ -178,19 +160,14 @@ export default function Step1({ data, setData, onNext }) {
 						Tra cứu theo CMND / CCCD
 					</p>
 					<div className="flex gap-2 mb-5">
-						<div className="relative flex-1">
-							<LuSearch
-								size={13}
-								className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-							/>
-							<input
-								type="text"
-								value={searchId}
-								onChange={(e) => setSearchId(e.target.value)}
-								placeholder="Nhập số CMND/CCCD..."
-								className="w-full pl-8 pr-3 py-2 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400"
-							/>
-						</div>
+						<Input
+							icon={<LuSearch size="15" />}
+							value={searchId}
+							onChange={(e) => setSearchId(e.target.value)}
+							placeholder="Nhập số CMND/CCCD..."
+							className="w-full flex-1"
+						/>
+
 						<Button
 							onClick={() => {
 								handleSearch(searchId);
