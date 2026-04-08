@@ -13,3 +13,8 @@ export const createCustomer = async (customerData) => {
 	});
 	return response;
 };
+
+export const getAllCustomer = async () => {
+	const response = await api.get('/customers');
+	return response;
+};
