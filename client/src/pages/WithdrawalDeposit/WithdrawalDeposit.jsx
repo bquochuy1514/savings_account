@@ -4,16 +4,14 @@ import {
   LuUser, 
   LuBookOpen, 
   LuCircleDollarSign, 
-  LuCalendarDays,
-  LuCheck,
-  LuPrinter,
-  LuX,
-  LuReceipt
+  LuCalendarDays
 } from 'react-icons/lu';
 import { toast } from 'react-toastify';
 import api from '../../services/api';
-import Button from '../../components/ui/Button';
 import PageHeader from '../../components/ui/PageHeader';
+import Button from '../../components/ui/Button';
+import Input from '../../components/ui/Input';
+import WithdrawalReceiptModal from './WithdrawalReceiptModal'; // Import Component Modal vừa tách
 import { getAllCustomer } from '../../services/customer.js';
 import { getSavingsBooks } from '../../services/savings-book.js';
 
@@ -210,6 +208,8 @@ export default function WithdrawalDeposit() {
 
       <div className="bg-white border border-gray-200 rounded-xl overflow-hidden p-6 mt-6 w-full shadow-sm">
         <form onSubmit={handleSubmit}>
+          
+          {/* --- SECTION 1 --- */}
           <div className="mb-8">
             <div className="flex items-center gap-2 mb-5">
               <div className="w-7 h-7 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center">
@@ -219,22 +219,18 @@ export default function WithdrawalDeposit() {
             </div>
             
             <div className="grid grid-cols-2 gap-5 pl-1">
-              <div className="relative" ref={dropdownRef}>
-                <label className="block text-xs font-medium text-gray-600 mb-1.5">
-                  Khách hàng (Tên hoặc CCCD) <span className="text-red-400">*</span>
-                </label>
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"><LuUser size={16} /></span>
-                  <input
-                    type="text"
-                    value={customerSearch}
-                    onChange={handleCustomerSearchChange}
-                    onFocus={() => setShowCustomerDropdown(true)}
-                    placeholder="Tìm kiếm theo Tên hoặc số CCCD..."
-                    className={`w-full py-2.5 text-sm border rounded-lg focus:outline-none transition-colors pl-9 pr-3 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-blue-100 focus:border-blue-400 ${errors.customerId ? 'border-red-300' : 'border-gray-200'}`}
-                    required
-                  />
-                </div>
+              {/* Dùng onFocusCapture để bắt sự kiện focus cho dropdown mà không cần sửa component Input */}
+              <div className="relative" ref={dropdownRef} onFocusCapture={() => setShowCustomerDropdown(true)}>
+                <Input
+                  label={<>Khách hàng (Tên hoặc CCCD) <span className="text-red-400">*</span></>}
+                  name="customerSearch"
+                  value={customerSearch}
+                  onChange={handleCustomerSearchChange}
+                  placeholder="Tìm kiếm theo Tên hoặc số CCCD..."
+                  icon={<LuUser size={16} />}
+                  error={errors.customerId}
+                />
+                
                 {showCustomerDropdown && (
                   <ul className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-auto py-1">
                     {filteredCustomers.length > 0 ? (
@@ -251,6 +247,7 @@ export default function WithdrawalDeposit() {
                 )}
               </div>
 
+              {/* Select Sổ tiết kiệm vẫn giữ nguyên vì Component Input của bạn không hỗ trợ thẻ <select> */}
               <div>
                 <label className="block text-xs font-medium text-gray-600 mb-1.5">
                   Mã Sổ tiết kiệm <span className="text-red-400">*</span>
@@ -281,6 +278,7 @@ export default function WithdrawalDeposit() {
 
           <hr className="border-gray-100 mb-8" />
 
+          {/* --- SECTION 2 --- */}
           <div className="mb-8">
             <div className="flex items-center gap-2 mb-5">
               <div className="w-7 h-7 rounded-lg bg-green-100 text-green-600 flex items-center justify-center">
@@ -291,22 +289,17 @@ export default function WithdrawalDeposit() {
 
             <div className="grid grid-cols-2 gap-5 pl-1">
               <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1.5">
-                  Số tiền rút (VNĐ) <span className="text-red-400">*</span>
-                </label>
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"><LuCircleDollarSign size={16} /></span>
-                  <input
-                    type="text" 
-                    name="amount"
-                    value={formData.amount ? Number(formData.amount).toLocaleString('vi-VN') : ''}
-                    onChange={handleAmountChange}
-                    disabled={!selectedBook || isTermDeposit}
-                    placeholder="VD: 1.000.000"
-                    className={`w-full py-2.5 text-sm border rounded-lg focus:outline-none transition-colors pl-9 pr-3 ${(!selectedBook || isTermDeposit) ? 'bg-gray-100 border-gray-200 text-gray-500 cursor-not-allowed font-semibold' : 'bg-gray-50 border-gray-200 focus:bg-white focus:ring-2 focus:ring-blue-100 focus:border-blue-400 font-semibold'} ${errors.amount ? 'border-red-300 focus:ring-red-100 focus:border-red-400' : ''}`}
-                    required
-                  />
-                </div>
+                {/* Áp dụng pointer-events-none và opacity để mô phỏng trạng thái disabled */}
+                <Input
+                  label={<>Số tiền rút (VNĐ) <span className="text-red-400">*</span></>}
+                  name="amount"
+                  value={formData.amount ? Number(formData.amount).toLocaleString('vi-VN') : ''}
+                  onChange={handleAmountChange}
+                  placeholder="VD: 1.000.000"
+                  icon={<LuCircleDollarSign size={16} />}
+                  error={errors.amount}
+                  className={(!selectedBook || isTermDeposit) ? 'opacity-60 pointer-events-none' : ''}
+                />
                 {isTermDeposit && (
                   <div className="mt-2.5 space-y-1.5">
                     <p className="text-xs text-orange-600 font-medium">* Sổ có kỳ hạn yêu cầu rút toàn bộ (Tất toán sổ)</p>
@@ -315,21 +308,16 @@ export default function WithdrawalDeposit() {
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1.5">
-                  Ngày giao dịch <span className="text-red-400">*</span>
-                </label>
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"><LuCalendarDays size={16} /></span>
-                  <input
-                    type="date"
-                    name="transactionDate"
-                    value={formData.transactionDate}
-                    onChange={(e) => setFormData(prev => ({...prev, transactionDate: e.target.value}))}
-                    disabled={!selectedBook}
-                    className={`w-full py-2.5 text-sm border rounded-lg focus:outline-none transition-colors pl-9 pr-3 ${!selectedBook ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed' : 'bg-gray-50 border-gray-200 focus:bg-white focus:ring-2 focus:ring-blue-100 focus:border-blue-400'} ${errors.transactionDate ? 'border-red-300' : ''}`}
-                    required
-                  />
-                </div>
+                 <Input
+                  type="date"
+                  label={<>Ngày giao dịch <span className="text-red-400">*</span></>}
+                  name="transactionDate"
+                  value={formData.transactionDate}
+                  onChange={(e) => setFormData(prev => ({...prev, transactionDate: e.target.value}))}
+                  icon={<LuCalendarDays size={16} />}
+                  error={errors.transactionDate}
+                  className={!selectedBook ? 'opacity-60 pointer-events-none' : ''}
+                />
               </div>
             </div>
           </div>
@@ -338,9 +326,8 @@ export default function WithdrawalDeposit() {
             <Button 
               type="submit" 
               isLoading={isLoading} 
-              disabled={!isFormValid || isLoading} 
-              icon={<LuArrowUpFromLine size={16} />} 
-              className={`w-auto px-6 ${!isFormValid ? 'opacity-50 cursor-not-allowed' : ''}`}
+              disabled={!isFormValid} 
+              icon={<LuArrowUpFromLine size={16} />}
             >
               Xác nhận rút tiền
             </Button>
@@ -348,91 +335,13 @@ export default function WithdrawalDeposit() {
         </form>
       </div>
 
-      {showSuccessModal && receiptData && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/40 backdrop-blur-sm transition-opacity">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in duration-300">
-            <div className="bg-green-50 px-6 py-6 text-center border-b border-green-100 relative">
-              <div className="absolute top-6 right-6 text-green-200 opacity-50">
-                <LuReceipt size={48} />
-              </div>
-              <div className="w-14 h-14 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-3 shadow-sm relative z-10">
-                <LuCheck size={28} />
-              </div>
-              <h2 className="text-xl font-bold text-gray-800 relative z-10">Giao dịch thành công!</h2>
-              <p className="text-sm text-gray-500 mt-1 relative z-10">Biên lai rút tiền tiết kiệm • #{receiptData?.transactionResult?.id || 'N/A'}</p>
-            </div>
+      {/* Gọi Modal Component ở đây */}
+      <WithdrawalReceiptModal 
+        isOpen={showSuccessModal} 
+        onClose={() => setShowSuccessModal(false)} 
+        receiptData={receiptData} 
+      />
 
-            <div className="p-6 space-y-6">
-              <div className="bg-gray-50 rounded-xl p-4 border border-gray-100 space-y-3">
-                <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Thông tin định danh</h3>
-                <div className="flex justify-between items-center text-sm">
-                  <span className="text-gray-500">Khách hàng</span>
-                  <span className="font-semibold text-gray-800">{receiptData?.customerSnapshot?.fullName || 'N/A'}</span>
-                </div>
-                <div className="flex justify-between items-center text-sm">
-                  <span className="text-gray-500">CMND / CCCD</span>
-                  <span className="font-mono text-gray-800">{receiptData?.customerSnapshot?.idNumber || 'N/A'}</span>
-                </div>
-                <div className="h-px bg-gray-200 w-full my-2"></div>
-                <div className="flex justify-between items-center text-sm">
-                  <span className="text-gray-500">Mã sổ tiết kiệm</span>
-                  <span className="font-mono font-medium text-blue-600 bg-blue-50 px-2 py-0.5 rounded">{receiptData?.savingsBookResult?.bookCode || 'N/A'}</span>
-                </div>
-                <div className="flex justify-between items-center text-sm">
-                  <span className="text-gray-500">Loại kỳ hạn</span>
-                  <span className="font-medium text-gray-800">{receiptData?.customerSnapshot?.termName || 'N/A'}</span>
-                </div>
-              </div>
-
-              <div className="space-y-3 px-2">
-                <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Chi tiết giao dịch</h3>
-                <div className="flex justify-between items-center text-sm">
-                  <span className="text-gray-500">Ngày giao dịch</span>
-                  <span className="font-medium text-gray-800">
-                    {/* ĐÃ SỬA: Chỉ hiển thị ngày, không hiển thị giờ */}
-                    {receiptData?.transactionResult?.transactionDate ? new Date(receiptData.transactionResult.transactionDate).toLocaleDateString('vi-VN') : 'N/A'}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center text-sm">
-                  <span className="text-gray-500">Số tiền gốc rút</span>
-                  <span className="font-medium text-gray-800">
-                    {Math.round(receiptData?.transactionResult?.amount || 0).toLocaleString('vi-VN')} đ
-                  </span>
-                </div>
-                <div className="flex justify-between items-center text-sm">
-                  <span className="text-gray-500">Tiền lãi nhận được</span>
-                  <span className="font-medium text-green-600">
-                    + {Math.round(receiptData?.transactionResult?.interest || 0).toLocaleString('vi-VN')} đ
-                  </span>
-                </div>
-              </div>
-
-              <div className="p-4 bg-blue-50 rounded-xl border border-blue-100 flex justify-between items-center">
-                <span className="font-semibold text-blue-800">Tổng tiền nhận</span>
-                <span className="text-2xl font-bold text-blue-700">
-                  {Math.round((receiptData?.transactionResult?.amount || 0) + (receiptData?.transactionResult?.interest || 0)).toLocaleString('vi-VN')} đ
-                </span>
-              </div>
-            </div>
-
-            <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex gap-3">
-              <button 
-                onClick={() => toast.info('Đang gửi lệnh đến máy in...')}
-                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-gray-300 text-gray-700 rounded-xl font-medium hover:bg-gray-50 transition-colors shadow-sm cursor-pointer"
-              >
-                <LuPrinter size={18} /> In biên lai
-              </button>
-              <button 
-                onClick={() => setShowSuccessModal(false)}
-                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 transition-colors shadow-sm cursor-pointer"
-              >
-                <LuX size={18} /> Đóng
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
-//test
