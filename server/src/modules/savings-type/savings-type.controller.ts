@@ -33,15 +33,13 @@ export class SavingsTypeController {
   }
 
   @Get()
-  @Roles(UserRole.MANAGER, UserRole.STAFF)
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard)
   findAllSavingsType() {
     return this.savingsTypeService.handleFindAllSavingsType();
   }
 
   @Get(':id')
-  @Roles(UserRole.MANAGER, UserRole.STAFF)
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard)
   findOneSavingsType(@Param('id', ParseIntPipe) id: number) {
     return this.savingsTypeService.handleFindOneSavingsType(id);
   }

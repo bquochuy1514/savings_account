@@ -8,12 +8,14 @@ import {
   UseGuards,
   Put,
   ParseIntPipe,
+  Query,
 } from '@nestjs/common';
 import { CustomersService } from './customers.service';
 import { CreateCustomerDto } from './dto/create-customer.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { ResponseMessage } from 'src/common/decorators/response-message.decorator';
+import { FindCustomerByIdNumberDto } from './dto/find-customer-by-idNumber';
 
 @Controller('customers')
 export class CustomersController {
@@ -30,6 +32,16 @@ export class CustomersController {
   @UseGuards(JwtAuthGuard)
   findAllCustomers() {
     return this.customersService.handleFindAllCustomers();
+  }
+
+  @Get('search')
+  @UseGuards(JwtAuthGuard)
+  findCustomerByIdNumber(
+    @Query() findCustomerByIdNumberDto: FindCustomerByIdNumberDto,
+  ) {
+    return this.customersService.handleFindCustomerByIdNumber(
+      findCustomerByIdNumberDto,
+    );
   }
 
   @Get(':id')

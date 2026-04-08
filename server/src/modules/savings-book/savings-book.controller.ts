@@ -8,7 +8,7 @@ import {
   UseGuards,
   Req,
   ParseIntPipe,
-  Put,
+  Query,
 } from '@nestjs/common';
 import { SavingsBookService } from './savings-book.service';
 import { CreateSavingsBookDto } from './dto/create-savings-book.dto';
@@ -36,8 +36,8 @@ export class SavingsBookController {
 
   @Get()
   @UseGuards(JwtAuthGuard)
-  findAllSavingsBook() {
-    return this.savingsBookService.handleFindAllSavingsBook();
+  findAllSavingsBook(@Query('customerId') customerId: number) {
+    return this.savingsBookService.handleFindAllSavingsBook(customerId);
   }
 
   @Post('deposit')

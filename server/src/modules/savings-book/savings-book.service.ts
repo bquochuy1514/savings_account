@@ -105,8 +105,9 @@ export class SavingsBookService {
     });
   }
 
-  handleFindAllSavingsBook() {
+  handleFindAllSavingsBook(customerId: number) {
     return this.prisma.savingsBook.findMany({
+      where: { customerId },
       include: {
         customer: true,
         savingsType: true,
@@ -310,6 +311,11 @@ export class SavingsBookService {
 
     // * Sổ có kỳ hạn
     if (termMonths > 0) {
+      if (amount)
+        throw new BadRequestException(
+          'Không được truyền số tiền với loại sổ có kỳ hạn',
+        );
+
       const expectedDays = addMonths(openDate, termMonths);
       if (withdrawalDate < expectedDays)
         throw new BadRequestException(

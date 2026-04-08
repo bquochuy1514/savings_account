@@ -6,6 +6,7 @@ import {
 import { CreateCustomerDto } from './dto/create-customer.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
 import { PrismaService } from 'src/prisma.service';
+import { FindCustomerByIdNumberDto } from './dto/find-customer-by-idNumber';
 
 @Injectable()
 export class CustomersService {
@@ -27,6 +28,19 @@ export class CustomersService {
 
   handleFindAllCustomers() {
     return this.prisma.customer.findMany();
+  }
+
+  async handleFindCustomerByIdNumber(
+    findCustomerByIdNumberDto: FindCustomerByIdNumberDto,
+  ) {
+    const customer = await this.prisma.customer.findFirst({
+      where: { idNumber: findCustomerByIdNumberDto.idNumber },
+    });
+    if (!customer)
+      throw new NotFoundException(
+        `Không tìm thấy khách hàng với số CCCD ${findCustomerByIdNumberDto.idNumber}`,
+      );
+    return customer;
   }
 
   async handleFindOneCustomer(id: number) {
