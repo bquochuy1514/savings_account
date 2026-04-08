@@ -1,14 +1,14 @@
 import { useState, useMemo, useRef, useEffect } from 'react';
 import { 
   LuArrowUpFromLine, 
-  LuRefreshCw, 
   LuUser, 
   LuBookOpen, 
   LuCircleDollarSign, 
   LuCalendarDays,
   LuCheck,
   LuPrinter,
-  LuX
+  LuX,
+  LuReceipt
 } from 'react-icons/lu';
 import { toast } from 'react-toastify';
 import api from '../../services/api';
@@ -28,7 +28,6 @@ export default function WithdrawalDeposit() {
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
 
-  // --- STATE TÌM KIẾM & DROPDOWN ---
   const [customerSearch, setCustomerSearch] = useState('');
   const [showCustomerDropdown, setShowCustomerDropdown] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
@@ -37,7 +36,6 @@ export default function WithdrawalDeposit() {
   const [savingsBooks, setSavingsBooks] = useState([]);
   const dropdownRef = useRef(null);
 
-  // --- STATE MODAL BIÊN LAI ---
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [receiptData, setReceiptData] = useState(null);
 
@@ -122,9 +120,7 @@ export default function WithdrawalDeposit() {
     if (errors.savingsBookId || errors.amount) setErrors({});
   };
 
-  // HÀM XỬ LÝ NHẬP TIỀN CÓ DẤU CHẤM
   const handleAmountChange = (e) => {
-    // Chỉ lấy các ký tự số, loại bỏ chữ và dấu chấm/phẩy
     const rawValue = e.target.value.replace(/\D/g, '');
     setFormData(prev => ({ ...prev, amount: rawValue }));
     if (errors.amount) setErrors(prev => ({ ...prev, amount: null }));
@@ -145,8 +141,15 @@ export default function WithdrawalDeposit() {
 
   const isTermDeposit = selectedBook && (selectedBook.savingsType?.termMonths || 0) > 0;
 
- const handleSubmit = async (e) => {
+  const isFormValid = useMemo(() => {
+    if (!formData.customerId || !formData.savingsBookId || !formData.transactionDate) return false;
+    if (!isTermDeposit && (!formData.amount || Number(formData.amount) <= 0)) return false;
+    return true;
+  }, [formData, isTermDeposit]);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!isFormValid) return;
     setIsLoading(true);
     setErrors({});
 
@@ -161,33 +164,25 @@ export default function WithdrawalDeposit() {
         payload.amount = Number(formData.amount);
       }
 
-      // Gọi API
       const response = await api.post('/savings-book/withdraw', payload);
-      
-      // IN RA CONSOLE ĐỂ KIỂM TRA (Nhấn F12 sang tab Console để xem)
-      console.log("🔍 Data trả về từ Server:", response);
-
-      // --- THUẬT TOÁN BÓC TÁCH DATA BẤT BẠI ---
-      // 1. Lột lớp vỏ của Axios (nếu có)
       const rawResponse = response.data ? response.data : response;
-      
-      // 2. Lột tiếp lớp vỏ "data" của Backend (theo đúng JSON bạn gửi)
       const actualReceiptData = rawResponse.data ? rawResponse.data : rawResponse;
 
-      // 3. Kiểm tra xem có chứa biên lai (transactionResult) không
       if (actualReceiptData && actualReceiptData.transactionResult) {
-        setReceiptData(actualReceiptData); 
-        setShowSuccessModal(true); // 🔥 Bật Modal Biên Lai lên!
+        setReceiptData({
+          ...actualReceiptData,
+          customerSnapshot: {
+            fullName: selectedCustomer?.fullName,
+            idNumber: selectedCustomer?.idNumber,
+            termName: selectedBook?.savingsType?.termMonths === 0 ? 'Không kỳ hạn' : `${selectedBook?.savingsType?.termMonths} tháng`
+          }
+        }); 
+        setShowSuccessModal(true); 
       } else {
-        // Nếu cấu trúc vẫn bị lệch, ít nhất vẫn báo Toast và không bị sập Web
         toast.success('Rút tiền thành công!');
-        console.warn('⚠️ Lỗi: Không thể hiện Biên lai do sai cấu trúc JSON', actualReceiptData);
       }
 
-      // Reset form nền phía sau
       handleReset();
-      
-      // Kéo lại data danh sách sổ để update trạng thái
       const booksRes = await getSavingsBooks();
       setSavingsBooks(booksRes.data || booksRes || []);
 
@@ -215,8 +210,6 @@ export default function WithdrawalDeposit() {
 
       <div className="bg-white border border-gray-200 rounded-xl overflow-hidden p-6 mt-6 w-full shadow-sm">
         <form onSubmit={handleSubmit}>
-          
-          {/* --- SECTION 1: Thông tin khách hàng & sổ --- */}
           <div className="mb-8">
             <div className="flex items-center gap-2 mb-5">
               <div className="w-7 h-7 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center">
@@ -288,7 +281,6 @@ export default function WithdrawalDeposit() {
 
           <hr className="border-gray-100 mb-8" />
 
-          {/* --- SECTION 2: Chi tiết giao dịch --- */}
           <div className="mb-8">
             <div className="flex items-center gap-2 mb-5">
               <div className="w-7 h-7 rounded-lg bg-green-100 text-green-600 flex items-center justify-center">
@@ -305,9 +297,8 @@ export default function WithdrawalDeposit() {
                 <div className="relative">
                   <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"><LuCircleDollarSign size={16} /></span>
                   <input
-                    type="text" // Chuyển thành text để hiển thị dấu chấm
+                    type="text" 
                     name="amount"
-                    // LOGIC HIỂN THỊ DẤU CHẤM TẠI ĐÂY
                     value={formData.amount ? Number(formData.amount).toLocaleString('vi-VN') : ''}
                     onChange={handleAmountChange}
                     disabled={!selectedBook || isTermDeposit}
@@ -344,74 +335,89 @@ export default function WithdrawalDeposit() {
           </div>
 
           <div className="pt-5 flex justify-end gap-3 border-t border-gray-100">
-            <button type="button" onClick={handleReset} className="flex items-center gap-1.5 px-4 py-2 cursor-pointer text-sm text-gray-500 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors shadow-sm">
-              <LuRefreshCw size={14} /> Làm mới
-            </button>
-            <Button type="submit" isLoading={isLoading} icon={<LuArrowUpFromLine size={16} />} className="w-auto px-6">
+            <Button 
+              type="submit" 
+              isLoading={isLoading} 
+              disabled={!isFormValid || isLoading} 
+              icon={<LuArrowUpFromLine size={16} />} 
+              className={`w-auto px-6 ${!isFormValid ? 'opacity-50 cursor-not-allowed' : ''}`}
+            >
               Xác nhận rút tiền
             </Button>
           </div>
         </form>
       </div>
 
-      {/* --- MODAL BIÊN LAI RÚT TIỀN (Hiệu ứng mờ nền) --- */}
       {showSuccessModal && receiptData && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/40 backdrop-blur-sm transition-opacity">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-300">
-            
-            {/* Header Modal */}
-            <div className="bg-green-50 px-6 py-8 text-center border-b border-green-100">
-              <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
-                <LuCheck size={32} />
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in duration-300">
+            <div className="bg-green-50 px-6 py-6 text-center border-b border-green-100 relative">
+              <div className="absolute top-6 right-6 text-green-200 opacity-50">
+                <LuReceipt size={48} />
               </div>
-              <h2 className="text-xl font-bold text-gray-800">Giao dịch thành công!</h2>
-              <p className="text-sm text-gray-500 mt-1">Biên lai rút tiền tiết kiệm</p>
+              <div className="w-14 h-14 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-3 shadow-sm relative z-10">
+                <LuCheck size={28} />
+              </div>
+              <h2 className="text-xl font-bold text-gray-800 relative z-10">Giao dịch thành công!</h2>
+              <p className="text-sm text-gray-500 mt-1 relative z-10">Biên lai rút tiền tiết kiệm • #{receiptData?.transactionResult?.id || 'N/A'}</p>
             </div>
 
-            {/* Body Modal */}
-            <div className="p-6 space-y-4">
-              <div className="flex justify-between items-center text-sm">
-                <span className="text-gray-500">Mã giao dịch</span>
-                <span className="font-medium text-gray-800">#{receiptData.transactionResult.id}</span>
-              </div>
-              <div className="flex justify-between items-center text-sm">
-                <span className="text-gray-500">Mã sổ tiết kiệm</span>
-                <span className="font-mono text-gray-800 bg-gray-100 px-2 py-0.5 rounded">{receiptData.savingsBookResult.bookCode}</span>
-              </div>
-              <div className="flex justify-between items-center text-sm">
-                <span className="text-gray-500">Thời gian</span>
-                <span className="font-medium text-gray-800">
-                  {new Date(receiptData.transactionResult.transactionDate).toLocaleString('vi-VN')}
-                </span>
-              </div>
-
-              <div className="my-4 border-t border-dashed border-gray-300"></div>
-
-              <div className="flex justify-between items-center text-sm">
-                <span className="text-gray-500">Số tiền gốc rút</span>
-                <span className="font-medium text-gray-800">
-                  {Math.round(receiptData.transactionResult.amount).toLocaleString('vi-VN')} đ
-                </span>
-              </div>
-              <div className="flex justify-between items-center text-sm">
-                <span className="text-gray-500">Tiền lãi nhận được</span>
-                <span className="font-medium text-green-600">
-                  + {Math.round(receiptData.transactionResult.interest).toLocaleString('vi-VN')} đ
-                </span>
+            <div className="p-6 space-y-6">
+              <div className="bg-gray-50 rounded-xl p-4 border border-gray-100 space-y-3">
+                <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Thông tin định danh</h3>
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-gray-500">Khách hàng</span>
+                  <span className="font-semibold text-gray-800">{receiptData?.customerSnapshot?.fullName || 'N/A'}</span>
+                </div>
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-gray-500">CMND / CCCD</span>
+                  <span className="font-mono text-gray-800">{receiptData?.customerSnapshot?.idNumber || 'N/A'}</span>
+                </div>
+                <div className="h-px bg-gray-200 w-full my-2"></div>
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-gray-500">Mã sổ tiết kiệm</span>
+                  <span className="font-mono font-medium text-blue-600 bg-blue-50 px-2 py-0.5 rounded">{receiptData?.savingsBookResult?.bookCode || 'N/A'}</span>
+                </div>
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-gray-500">Loại kỳ hạn</span>
+                  <span className="font-medium text-gray-800">{receiptData?.customerSnapshot?.termName || 'N/A'}</span>
+                </div>
               </div>
 
-              <div className="mt-4 p-4 bg-blue-50 rounded-xl border border-blue-100 flex justify-between items-center">
+              <div className="space-y-3 px-2">
+                <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Chi tiết giao dịch</h3>
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-gray-500">Ngày giao dịch</span>
+                  <span className="font-medium text-gray-800">
+                    {/* ĐÃ SỬA: Chỉ hiển thị ngày, không hiển thị giờ */}
+                    {receiptData?.transactionResult?.transactionDate ? new Date(receiptData.transactionResult.transactionDate).toLocaleDateString('vi-VN') : 'N/A'}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-gray-500">Số tiền gốc rút</span>
+                  <span className="font-medium text-gray-800">
+                    {Math.round(receiptData?.transactionResult?.amount || 0).toLocaleString('vi-VN')} đ
+                  </span>
+                </div>
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-gray-500">Tiền lãi nhận được</span>
+                  <span className="font-medium text-green-600">
+                    + {Math.round(receiptData?.transactionResult?.interest || 0).toLocaleString('vi-VN')} đ
+                  </span>
+                </div>
+              </div>
+
+              <div className="p-4 bg-blue-50 rounded-xl border border-blue-100 flex justify-between items-center">
                 <span className="font-semibold text-blue-800">Tổng tiền nhận</span>
-                <span className="text-xl font-bold text-blue-700">
-                  {Math.round(receiptData.transactionResult.amount + receiptData.transactionResult.interest).toLocaleString('vi-VN')} đ
+                <span className="text-2xl font-bold text-blue-700">
+                  {Math.round((receiptData?.transactionResult?.amount || 0) + (receiptData?.transactionResult?.interest || 0)).toLocaleString('vi-VN')} đ
                 </span>
               </div>
             </div>
 
-            {/* Footer Modal */}
             <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex gap-3">
               <button 
-                onClick={() => toast.info('Đang in biên lai...')}
+                onClick={() => toast.info('Đang gửi lệnh đến máy in...')}
                 className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-gray-300 text-gray-700 rounded-xl font-medium hover:bg-gray-50 transition-colors shadow-sm cursor-pointer"
               >
                 <LuPrinter size={18} /> In biên lai
@@ -423,12 +429,9 @@ export default function WithdrawalDeposit() {
                 <LuX size={18} /> Đóng
               </button>
             </div>
-
           </div>
         </div>
       )}
-
     </div>
   );
 }
-//test
