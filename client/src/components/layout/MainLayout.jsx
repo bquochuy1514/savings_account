@@ -139,7 +139,7 @@ export default function MainLayout() {
 					<LuPiggyBank size={25} className="text-blue-600" />
 					<div>
 						<div className="text-sm font-semibold text-gray-800 leading-tight">
-							Tiết Kiệm
+							Sổ tiết Kiệm
 						</div>
 						<div className="text-[10px] text-gray-400">
 							Quản lý sổ tiết kiệm

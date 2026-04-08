@@ -5,6 +5,7 @@ import Step1 from './Step1';
 import Step2 from './Step2';
 import { getSavingsTypes } from '../../services/savings-type';
 import Step3 from './Step3';
+import Step4 from './Step4';
 import { toast } from 'react-toastify';
 import { createCustomer } from '../../services/customer';
 import { createSavingsBook } from '../../services/savings-book';
@@ -18,6 +19,7 @@ function StepBar({ current }) {
 		{ num: 1, label: 'Khách hàng' },
 		{ num: 2, label: 'Sổ tiết kiệm' },
 		{ num: 3, label: 'Xác nhận' },
+		{ num: 4, label: 'Hoàn tất' },
 	];
 	return (
 		<div className="flex items-center gap-0 mb-8">
@@ -49,24 +51,28 @@ function StepBar({ current }) {
 	);
 }
 
+const initialCustomerData = {
+	id: null,
+	fullName: '',
+	idNumber: '',
+	address: '',
+	isExisting: false,
+};
+
+const initialBookData = {
+	savingsTypeId: null,
+	openDate: today(),
+	amountRaw: '',
+};
+
 export default function OpenSavingsBook() {
 	const [step, setStep] = useState(1);
 	const [loading, setLoading] = useState(false);
 	const [savingsTypes, setSavingsTypes] = useState([]);
+	const [result, setResult] = useState(null); // data trả về từ API sau khi mở sổ
 
-	const [customerData, setCustomerData] = useState({
-		id: null, // ID khách hàng (lấy từ Step1 khi tìm/tạo KH)
-		fullName: '',
-		idNumber: '',
-		address: '',
-		isExisting: false,
-	});
-
-	const [bookData, setBookData] = useState({
-		savingsTypeId: null, // ID loại tiết kiệm
-		openDate: today(), // Ngày mở sổ (ISO string)
-		amountRaw: '', // Số tiền dạng string thô, parse sang number khi submit
-	});
+	const [customerData, setCustomerData] = useState(initialCustomerData);
+	const [bookData, setBookData] = useState(initialBookData);
 
 	const handleSubmit = async () => {
 		try {
@@ -90,16 +96,22 @@ export default function OpenSavingsBook() {
 				balance: parseInt(bookData.amountRaw, 10),
 			};
 
-			console.log(payload);
-
 			const response = await createSavingsBook(payload);
-			toast.success(response.message);
+			setResult(response.data); // lưu { savingsBookResult, transactionResult }
+			setStep(4);
 		} catch (error) {
 			console.log(error);
 			toast.error(error.message);
 		} finally {
 			setLoading(false);
 		}
+	};
+
+	const handleReset = () => {
+		setCustomerData(initialCustomerData);
+		setBookData(initialBookData);
+		setResult(null);
+		setStep(1);
 	};
 
 	const fetchSavingsTypes = async () => {
@@ -144,13 +156,7 @@ export default function OpenSavingsBook() {
 					onNext={() => setStep(3)}
 					onBack={() => {
 						setStep(1);
-						setCustomerData({
-							customerId: null,
-							fullName: '',
-							idNumber: '',
-							address: '',
-							isExisting: false,
-						});
+						setCustomerData(initialCustomerData);
 					}}
 				/>
 			)}
@@ -162,6 +168,14 @@ export default function OpenSavingsBook() {
 					onSubmit={handleSubmit}
 					loading={loading}
 					savingsTypes={savingsTypes}
+				/>
+			)}
+			{step === 4 && result && (
+				<Step4
+					result={result}
+					customerData={customerData}
+					savingsTypes={savingsTypes}
+					onReset={handleReset}
 				/>
 			)}
 		</div>
