@@ -11,3 +11,8 @@ export const createCustomer = async (customerData) => {
 	const response = await api.post('/customers', customerData);
 	return response;
 };
+
+export const getAllCustomer = async () => {
+	const response = await api.get('/customers');
+	return response;
+};
