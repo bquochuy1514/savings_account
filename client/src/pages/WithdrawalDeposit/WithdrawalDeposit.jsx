@@ -12,8 +12,10 @@ import {
 } from 'react-icons/lu';
 import { toast } from 'react-toastify';
 import api from '../../services/api';
-import Button from '../../components/ui/Button';
 import PageHeader from '../../components/ui/PageHeader';
+import Button from '../../components/ui/Button';
+import Input from '../../components/ui/Input';
+import WithdrawalReceiptModal from './WithdrawalReceiptModal'; // Import Component Modal vừa tách
 import { getAllCustomer } from '../../services/customer.js';
 import { getSavingsBooks } from '../../services/savings-book.js';
 
