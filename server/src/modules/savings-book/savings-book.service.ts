@@ -78,8 +78,6 @@ export class SavingsBookService {
 
       const bookCode = `STK-${year}-${String(count + 1).padStart(6, '0')}`;
 
-      console.log('Book code: ', bookCode);
-
       const savingsBookResult = await tx.savingsBook.create({
         data: {
           bookCode,

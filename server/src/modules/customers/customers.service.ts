@@ -19,7 +19,9 @@ export class CustomersService {
     });
 
     if (existingIdNumber)
-      throw new ConflictException('CMND đã tồn tại trong hệ thống');
+      throw new ConflictException(
+        'CMND/CCCD đã tồn tại trong hệ thống. Hãy chọn khách hàng cũ',
+      );
 
     return this.prisma.customer.create({
       data: createCustomerDto,
