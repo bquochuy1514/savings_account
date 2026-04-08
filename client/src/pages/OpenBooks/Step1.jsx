@@ -24,7 +24,7 @@ export default function Step1({ data, setData, onNext }) {
 		setSearchResult(null);
 		setError(null);
 		try {
-			const res = await getCustomerByIdNumber(idNumber);
+			const res = await getCustomerByIdNumber(idNumber.trim());
 			const data = res.data;
 			setSearchResult({ ...data, isExisting: true });
 		} catch (err) {

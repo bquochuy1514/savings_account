@@ -3,12 +3,11 @@ import {
 	LuChevronLeft,
 	LuBanknote,
 	LuCalendar,
-	LuHash,
 	LuCheck,
 	LuClock,
 	LuTrendingUp,
-	LuFileText,
 } from 'react-icons/lu';
+import Input from '../../components/ui/Input';
 
 function formatVND(value) {
 	if (!value) return '';
@@ -108,82 +107,41 @@ export default function Step2({
 					Thông tin sổ
 				</p>
 				<div className="space-y-4">
-					<div className="grid grid-cols-2 gap-4">
-						<div>
-							<label className="block text-xs font-medium text-gray-500 mb-1.5">
-								Mã sổ <span className="text-red-400">*</span>
-							</label>
-							<div className="relative">
-								<LuHash
-									size={13}
-									className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-								/>
-								<input
-									type="text"
-									value={bookData.bookCode || ''}
-									onChange={(e) =>
-										setBookData({
-											...bookData,
-											bookCode: e.target.value,
-										})
-									}
-									className="w-full pl-8 pr-3 py-2 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400"
-								/>
-							</div>
-							<p className="text-xs text-gray-400 mt-1">
-								Tự động sinh, có thể chỉnh sửa
-							</p>
-						</div>
-						<div>
-							<label className="block text-xs font-medium text-gray-500 mb-1.5">
+					<Input
+						label={
+							<>
 								Ngày mở sổ{' '}
 								<span className="text-red-400">*</span>
-							</label>
-							<div className="relative">
-								<LuCalendar
-									size={13}
-									className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-								/>
-								<input
-									type="date"
-									value={bookData.openDate || ''}
-									onChange={(e) =>
-										setBookData({
-											...bookData,
-											openDate: e.target.value,
-										})
-									}
-									className="w-full pl-8 pr-3 py-2 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400"
-								/>
-							</div>
-						</div>
-					</div>
+							</>
+						}
+						icon={<LuCalendar size={15} />}
+						type="date"
+						value={bookData.openDate || ''}
+						onChange={(e) =>
+							setBookData({
+								...bookData,
+								openDate: e.target.value,
+							})
+						}
+					/>
 
 					<div>
-						<label className="block text-xs font-medium text-gray-500 mb-1.5">
-							Số tiền gởi ban đầu{' '}
-							<span className="text-red-400">*</span>
-						</label>
-						<div className="relative">
-							<LuBanknote
-								size={13}
-								className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-							/>
-							<input
-								type="text"
-								value={
-									bookData.amountRaw
-										? formatVND(bookData.amountRaw)
-										: ''
-								}
-								onChange={handleAmountChange}
-								placeholder="1.000.000"
-								className="w-full pl-8 pr-14 py-2 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400"
-							/>
-							<span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 font-medium">
-								VNĐ
-							</span>
-						</div>
+						<Input
+							label={
+								<>
+									Số tiền gởi ban đầu{' '}
+									<span className="text-red-400">*</span>
+								</>
+							}
+							icon={<LuBanknote size={15} />}
+							value={
+								bookData.amountRaw
+									? formatVND(bookData.amountRaw)
+									: ''
+							}
+							onChange={handleAmountChange}
+							placeholder="1.000.000 VNĐ"
+						/>
 						{selectedType && (
 							<p className="text-xs text-gray-400 mt-1">
 								Tối thiểu{' '}
@@ -193,30 +151,6 @@ export default function Step2({
 								đ
 							</p>
 						)}
-					</div>
-
-					<div>
-						<label className="block text-xs font-medium text-gray-500 mb-1.5">
-							Ghi chú
-						</label>
-						<div className="relative">
-							<LuFileText
-								size={13}
-								className="absolute left-3 top-3 text-gray-400"
-							/>
-							<textarea
-								value={bookData.note || ''}
-								onChange={(e) =>
-									setBookData({
-										...bookData,
-										note: e.target.value,
-									})
-								}
-								placeholder="Ghi chú tuỳ chọn..."
-								rows={2}
-								className="w-full pl-8 pr-3 py-2 text-sm border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-400 resize-none"
-							/>
-						</div>
 					</div>
 				</div>
 			</div>
@@ -232,7 +166,6 @@ export default function Step2({
 					onClick={onNext}
 					disabled={
 						!bookData.savingsTypeId ||
-						!bookData.bookCode ||
 						!bookData.openDate ||
 						!bookData.amountRaw
 					}
