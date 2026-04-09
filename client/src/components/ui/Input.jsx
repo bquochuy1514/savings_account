@@ -16,6 +16,8 @@ import { LuEye, LuEyeOff } from 'react-icons/lu';
  * @param {boolean}          showTogglePassword - Tự động thêm nút hiện/ẩn mật khẩu khi type='password'
  * @param {string}           autoComplete      - Giá trị autocomplete
  * @param {string}           className         - Class tuỳ chỉnh thêm cho thẻ input
+ * @param {boolean}          disabled          - Trạng thái vô hiệu hóa input
+ * @param {object}           rest              - Các props khác (nếu có)
  */
 
 function Input({
@@ -29,6 +31,8 @@ function Input({
 	icon,
 	showTogglePassword = false,
 	className = '',
+	disabled = false,
+	...rest
 }) {
 	const [visible, setVisible] = useState(false);
 
@@ -59,6 +63,7 @@ function Input({
 					value={value}
 					onChange={onChange}
 					placeholder={placeholder}
+					disabled={disabled}
 					className={`
 						w-full py-2.5 text-sm border border-gray-200 rounded-lg
 						bg-gray-50 focus:bg-white focus:outline-none
@@ -67,8 +72,9 @@ function Input({
 						${icon ? 'pl-9' : 'pl-3'}
 						${showTogglePassword ? 'pr-9' : 'pr-3'}
 						${error ? 'border-red-300 focus:ring-red-100 focus:border-red-400' : ''}
-						
+						${disabled ? 'opacity-60 cursor-not-allowed bg-gray-100' : ''}
 					`}
+					{...rest}
 				/>
 
 				{showTogglePassword && (

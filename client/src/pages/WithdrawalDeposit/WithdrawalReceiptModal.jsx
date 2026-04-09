@@ -1,82 +1,113 @@
-import { LuReceipt, LuCheck, LuPrinter, LuX } from 'react-icons/lu';
-import { toast } from 'react-toastify';
+import { LuCheck, LuPrinter, LuX } from 'react-icons/lu';
+import Button from '../../components/ui/Button';
 
 export default function WithdrawalReceiptModal({ isOpen, onClose, receiptData }) {
   if (!isOpen || !receiptData) return null;
 
+  const { transactionResult, savingsBookResult, customerSnapshot } = receiptData;
+
+  const handlePrint = () => {
+    window.print();
+  };
+
+  const formatDate = (dateStr) => {
+    if (!dateStr) return 'N/A';
+    const d = new Date(dateStr);
+    return `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth() + 1).toString().padStart(2, '0')}/${d.getFullYear()}`;
+  };
+
+  const originalAmount = transactionResult?.amount || 0;
+  const interest = transactionResult?.interest || 0;
+  const totalAmount = originalAmount + interest;
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/40 backdrop-blur-sm transition-opacity">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in duration-300">
-        <div className="bg-green-50 px-6 py-6 text-center border-b border-green-100 relative">
-          <div className="absolute top-6 right-6 text-green-200 opacity-50">
-            <LuReceipt size={48} />
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4 transition-opacity">
+      <div className="bg-white rounded-2xl w-full max-w-md shadow-xl overflow-hidden print:w-full print:max-w-none print:shadow-none print:bg-white print:text-black">
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-gray-50 print:hidden">
+          <div className="flex items-center gap-2 text-green-600">
+            <LuCheck size={20} className="stroke-2" />
+            <span className="font-semibold text-sm">Rút tiền thành công</span>
           </div>
-          <div className="w-14 h-14 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-3 shadow-sm relative z-10">
-            <LuCheck size={28} />
-          </div>
-          <h2 className="text-xl font-bold text-gray-800 relative z-10">Giao dịch thành công!</h2>
-          <p className="text-sm text-gray-500 mt-1 relative z-10">Biên lai rút tiền tiết kiệm • #{receiptData?.transactionResult?.id || 'N/A'}</p>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 cursor-pointer">
+            <LuX size={20} />
+          </button>
         </div>
 
-        <div className="p-6 space-y-6">
-          <div className="bg-gray-50 rounded-xl p-4 border border-gray-100 space-y-3">
-            <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Thông tin định danh</h3>
-            <div className="flex justify-between items-center text-sm">
-              <span className="text-gray-500">Khách hàng</span>
-              <span className="font-semibold text-gray-800">{receiptData?.customerSnapshot?.fullName || 'N/A'}</span>
-            </div>
-            <div className="flex justify-between items-center text-sm">
-              <span className="text-gray-500">CMND / CCCD</span>
-              <span className="font-mono text-gray-800">{receiptData?.customerSnapshot?.idNumber || 'N/A'}</span>
-            </div>
-            <div className="h-px bg-gray-200 w-full my-2"></div>
-            <div className="flex justify-between items-center text-sm">
-              <span className="text-gray-500">Mã sổ tiết kiệm</span>
-              <span className="font-mono font-medium text-blue-600 bg-blue-50 px-2 py-0.5 rounded">{receiptData?.savingsBookResult?.bookCode || 'N/A'}</span>
-            </div>
-            <div className="flex justify-between items-center text-sm">
-              <span className="text-gray-500">Loại kỳ hạn</span>
-              <span className="font-medium text-gray-800">{receiptData?.customerSnapshot?.termName || 'N/A'}</span>
-            </div>
-          </div>
+        {/* Print Header (Chỉ hiện khi bấm In) */}
+        <div className="hidden print:block text-center border-b border-gray-200 pb-4 mb-4 mt-8">
+          <h2 className="text-2xl font-bold uppercase tracking-wider">Phiếu Rút Tiền</h2>
+          <p className="text-sm text-gray-500 mt-1">Mã GD: #{transactionResult?.id}</p>
+        </div>
 
-          <div className="space-y-3 px-2">
-            <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Chi tiết giao dịch</h3>
-            <div className="flex justify-between items-center text-sm">
-              <span className="text-gray-500">Ngày giao dịch</span>
-              <span className="font-medium text-gray-800">
-                {receiptData?.transactionResult?.transactionDate ? new Date(receiptData.transactionResult.transactionDate).toLocaleDateString('vi-VN') : 'N/A'}
-              </span>
+        {/* Content */}
+        <div className="p-6">
+          <div className="space-y-4">
+            {/* Amount block - Đổi sang màu xanh lá cho Rút tiền */}
+            <div className="bg-green-50/50 rounded-xl p-4 text-center border border-green-100/50 print:border-0 print:bg-transparent print:p-0 print:mb-6">
+              <p className="text-xs text-green-600/80 uppercase font-medium tracking-wider mb-1 print:text-gray-500">Tổng tiền nhận</p>
+              <p className="text-3xl font-bold text-green-700 print:text-black">
+                {Math.round(totalAmount).toLocaleString('vi-VN')} <span className="text-lg text-green-600/80 print:text-gray-700">VNĐ</span>
+              </p>
             </div>
-            <div className="flex justify-between items-center text-sm">
-              <span className="text-gray-500">Số tiền gốc rút</span>
-              <span className="font-medium text-gray-800">
-                {Math.round(receiptData?.transactionResult?.amount || 0).toLocaleString('vi-VN')} đ
-              </span>
-            </div>
-            <div className="flex justify-between items-center text-sm">
-              <span className="text-gray-500">Tiền lãi nhận được</span>
-              <span className="font-medium text-green-600">
-                + {Math.round(receiptData?.transactionResult?.interest || 0).toLocaleString('vi-VN')} đ
-              </span>
-            </div>
-          </div>
 
-          <div className="p-4 bg-blue-50 rounded-xl border border-blue-100 flex justify-between items-center">
-            <span className="font-semibold text-blue-800">Tổng tiền nhận</span>
-            <span className="text-2xl font-bold text-blue-700">
-              {Math.round((receiptData?.transactionResult?.amount || 0) + (receiptData?.transactionResult?.interest || 0)).toLocaleString('vi-VN')} đ
-            </span>
+            <div className="text-sm text-gray-600 space-y-3 pt-2">
+              <div className="flex justify-between items-center pb-2 border-b border-gray-50 print:border-gray-200">
+                <span className="text-gray-500">Mã sổ tiết kiệm:</span>
+                <span className="font-medium text-gray-900">{savingsBookResult?.bookCode}</span>
+              </div>
+              <div className="flex justify-between items-center pb-2 border-b border-gray-50 print:border-gray-200">
+                <span className="text-gray-500">Khách hàng:</span>
+                <span className="font-medium text-gray-900">{customerSnapshot?.fullName}</span>
+              </div>
+              <div className="flex justify-between items-center pb-2 border-b border-gray-50 print:border-gray-200">
+                <span className="text-gray-500">CCCD/CMND:</span>
+                <span className="font-medium text-gray-900">{customerSnapshot?.idNumber}</span>
+              </div>
+              <div className="flex justify-between items-center pb-2 border-b border-gray-50 print:border-gray-200">
+                <span className="text-gray-500">Kỳ hạn:</span>
+                <span className="font-medium text-gray-900">{customerSnapshot?.termName}</span>
+              </div>
+              
+              <div className="flex justify-between items-center pb-2 border-b border-gray-50 print:border-gray-200">
+                <span className="text-gray-500">Số tiền gốc rút:</span>
+                <span className="font-medium text-gray-900">{Math.round(originalAmount).toLocaleString('vi-VN')} VNĐ</span>
+              </div>
+              <div className="flex justify-between items-center pb-2 border-b border-gray-50 print:border-gray-200">
+                <span className="text-gray-500">Tiền lãi nhận được:</span>
+                <span className="font-medium text-green-600 print:text-black">+ {Math.round(interest).toLocaleString('vi-VN')} VNĐ</span>
+              </div>
+
+              <div className="flex justify-between items-center pb-2 border-b border-gray-50 print:border-gray-200">
+                <span className="text-gray-500">Ngày giao dịch:</span>
+                <span className="font-medium text-gray-900">
+                  {formatDate(transactionResult?.transactionDate)}
+                </span>
+              </div>
+            </div>
+            
+            {/* Signature section for print only (Chỉ hiện khi bấm In) */}
+            <div className="hidden print:flex justify-between mt-12 px-8">
+              <div className="text-center">
+                <p className="font-medium text-sm text-black">Khách hàng</p>
+                <p className="text-xs text-gray-500 mt-1">(Ký và ghi rõ họ tên)</p>
+              </div>
+              <div className="text-center">
+                <p className="font-medium text-sm text-black">Giao dịch viên</p>
+                <p className="text-xs text-gray-500 mt-1">(Ký và ghi rõ họ tên)</p>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex gap-3">
-          <button onClick={() => toast.info('Đang gửi lệnh đến máy in...')} className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-white border border-gray-300 text-gray-700 rounded-xl font-medium hover:bg-gray-50 transition-colors shadow-sm cursor-pointer">
-            <LuPrinter size={18} /> In biên lai
-          </button>
-          <button onClick={onClose} className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700 transition-colors shadow-sm cursor-pointer">
-            <LuX size={18} /> Đóng
-          </button>
+        {/* Footer */}
+        <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex items-center justify-end gap-3 print:hidden">
+          <Button variant="secondary" onClick={onClose}>
+            Đóng
+          </Button>
+          <Button onClick={handlePrint} icon={<LuPrinter size={16} />}>
+            In biên lai
+          </Button>
         </div>
       </div>
     </div>

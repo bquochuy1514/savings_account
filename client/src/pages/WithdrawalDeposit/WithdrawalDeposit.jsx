@@ -212,9 +212,7 @@ export default function WithdrawalDeposit() {
           {/* --- SECTION 1 --- */}
           <div className="mb-8">
             <div className="flex items-center gap-2 mb-5">
-              <div className="w-7 h-7 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center">
-                <LuUser size={14} />
-              </div>
+              
               <p className="text-xs font-medium text-gray-400 uppercase tracking-wider">Thông tin tra cứu</p>
             </div>
             
@@ -281,9 +279,7 @@ export default function WithdrawalDeposit() {
           {/* --- SECTION 2 --- */}
           <div className="mb-8">
             <div className="flex items-center gap-2 mb-5">
-              <div className="w-7 h-7 rounded-lg bg-green-100 text-green-600 flex items-center justify-center">
-                <LuCircleDollarSign size={14} />
-              </div>
+             
               <p className="text-xs font-medium text-gray-400 uppercase tracking-wider">Chi tiết giao dịch</p>
             </div>
 
