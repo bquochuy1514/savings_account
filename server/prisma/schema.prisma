@@ -82,6 +82,7 @@ model SavingsBook {
   customerId     Int    
   savingsTypeId  Int    
   openDate       DateTime
+  closeDate      DateTime?
   balance        Float
   status         BookStatus       @default(OPEN)
   openedBy       Int

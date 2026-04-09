@@ -37,6 +37,12 @@ export class SavingsTypeController {
     return this.savingsTypeService.handleFindAllSavingsType();
   }
 
+  @Get('/active')
+  @UseGuards(JwtAuthGuard)
+  findAllActiveSavingsType() {
+    return this.savingsTypeService.handleFindAllActiveSavingsType();
+  }
+
   @Get(':id')
   @UseGuards(JwtAuthGuard)
   findOneSavingsType(@Param('id', ParseIntPipe) id: number) {

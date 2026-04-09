@@ -31,6 +31,10 @@ export class SavingsTypeService {
     return this.prisma.savingsType.findMany();
   }
 
+  handleFindAllActiveSavingsType() {
+    return this.prisma.savingsType.findMany({ where: { isActive: true } });
+  }
+
   async handleFindOneSavingsType(id: number) {
     const savingsType = await this.prisma.savingsType.findUnique({
       where: { id },

@@ -293,6 +293,7 @@ export class SavingsBookService {
                 where: { id: savingsBookId },
                 data: {
                   balance: 0,
+                  closeDate: withdrawalDate,
                   status: BookStatus.CLOSED,
                 },
               })
@@ -420,6 +421,7 @@ export class SavingsBookService {
             data: {
               balance: 0,
               status: BookStatus.CLOSED,
+              closeDate: withdrawalDate,
             },
           }),
         ]);
