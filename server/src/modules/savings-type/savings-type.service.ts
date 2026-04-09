@@ -58,15 +58,4 @@ export class SavingsTypeService {
       data: updateSavingsTypeDto,
     });
   }
-
-  async handleDeleteSavingsType(id: number) {
-    const existing = await this.prisma.savingsType.findUnique({
-      where: { id },
-    });
-
-    if (!existing)
-      throw new NotFoundException('Không tìm thấy loại tiết kiệm cần cập nhật');
-
-    return this.prisma.savingsType.delete({ where: { id } });
-  }
 }

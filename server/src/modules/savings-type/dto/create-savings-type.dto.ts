@@ -1,4 +1,4 @@
-import { IsInt, IsNumber, IsString, Min } from 'class-validator';
+import { IsBoolean, IsInt, IsNumber, IsString, Min } from 'class-validator';
 
 export class CreateSavingsTypeDto {
   @IsString()
@@ -23,4 +23,7 @@ export class CreateSavingsTypeDto {
   @IsNumber()
   @Min(0)
   minAddDeposit: number;
+
+  @IsBoolean()
+  isActive: boolean;
 }

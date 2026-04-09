@@ -4,7 +4,6 @@ import {
   Post,
   Body,
   Param,
-  Delete,
   UseGuards,
   Put,
   ParseIntPipe,
@@ -23,7 +22,7 @@ export class SavingsTypeController {
   constructor(private readonly savingsTypeService: SavingsTypeService) {}
 
   @Post()
-  @Roles(UserRole.MANAGER)
+  @Roles(UserRole.MANAGER, UserRole.ADMIN)
   @ResponseMessage('Tạo loại tiết kiệm thành công!')
   @UseGuards(JwtAuthGuard, RolesGuard)
   createSavingsType(@Body() createSavingsTypeDto: CreateSavingsTypeDto) {
@@ -45,7 +44,7 @@ export class SavingsTypeController {
   }
 
   @Put(':id')
-  @Roles(UserRole.MANAGER)
+  @Roles(UserRole.MANAGER, UserRole.ADMIN)
   @UseGuards(JwtAuthGuard, RolesGuard)
   updateSavingsType(
     @Param('id', ParseIntPipe) id: number,
@@ -55,12 +54,5 @@ export class SavingsTypeController {
       id,
       updateSavingsTypeDto,
     );
-  }
-
-  @Delete(':id')
-  @Roles(UserRole.MANAGER)
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  deleteSavingsType(@Param('id', ParseIntPipe) id: number) {
-    return this.savingsTypeService.handleDeleteSavingsType(id);
   }
 }
