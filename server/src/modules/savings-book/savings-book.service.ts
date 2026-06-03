@@ -48,9 +48,9 @@ export class SavingsBookService {
         `Số tiền gởi ban đầu tối thiểu là ${savingsType.minInitDeposit.toLocaleString('vi-VN')}đ`,
       );
 
-    const now = new Date();
-    const open = new Date(openDate);
-    const diffDays = (now.getTime() - open.getTime()) / (1000 * 60 * 60 * 24);
+    // const now = new Date();
+    // const open = new Date(openDate);
+    // const diffDays = (now.getTime() - open.getTime()) / (1000 * 60 * 60 * 24);
 
     // if (open > now) {
     //   throw new BadRequestException('Ngày mở sổ không được là ngày tương lai');
@@ -103,9 +103,8 @@ export class SavingsBookService {
     });
   }
 
-  handleFindAllSavingsBook(customerId: number) {
+  handleFindAllSavingsBook() {
     return this.prisma.savingsBook.findMany({
-      where: { customerId },
       include: {
         customer: true,
         savingsType: true,

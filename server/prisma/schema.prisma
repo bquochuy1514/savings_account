@@ -107,8 +107,7 @@ model Transaction {
   type            TransactionType
   amount          Float           // số tiền gởi hoặc rút (không tính lãi)
   transactionDate DateTime        // ngày giao dịch thực tế (do user nhập)
-  interest        Float?          // lãi tính được, chỉ có giá trị khi type = WITHDRAWAL
-  note            String?         // ghi chú tuỳ chọn
+  interest        Float?          // lãi tính được, chỉ có giá trị khi type = WITHDRAWA
   performedBy     Int
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
